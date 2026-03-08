@@ -1,7 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("Todo"));
 
 var app = builder.Build();
 
@@ -13,9 +16,24 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/todos", () =>
+app.MapGet("/todos", async (AppDbContext db) =>
 {
-    return
+    return await db.Todos.ToListAsync();
+});
+
+app.MapGet("/todos/{id}", async (int id, AppDbContext db) =>
+    await db.Todos.FindAsync(id)
+        is TodoItem todo
+            ? Results.Ok(todo)
+            : Results.NotFound()
+);
+
+app.MapPost("todos", async (TodoItem todo, AppDbContext db) =>
+{
+    db.Todos.Add(todo);
+    await db.SaveChangesAsync();
+
+    return Results.Created($"/todos/{todo.Id}", todo);
 });
 
 app.Run();
