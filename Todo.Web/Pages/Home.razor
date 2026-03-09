@@ -1,7 +1,85 @@
 ﻿@page "/"
+@using System.Threading.Tasks
+@inject IJSRuntime JS
+@inject HttpClient Http;
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Início</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Bem-vindo ao TodoBlaze!</h1>
 
-Welcome to your new app.
+<p>Organize suas tarefas rapidamente.</p>
+
+<button @onclick="ToggleForm" class="btn btn-primary">
+    <span> <i class="bi bi-plus"></i> Nova tarefa</span>
+</button>
+
+@if (showForm)
+{
+    <div class="mt-3">
+        <EditForm Model="newTodo" OnValidSubmit="AddTodo">
+    
+            <InputText class="form-control" @bind-Value="newTodo.Title" aria-placeholder="Titulo da tarefa"/>
+
+            <button class="btn btn-primary mt-2">
+                Adicionar
+            </button>
+
+        </EditForm>
+        <button @onclick="ToggleForm">Cancelar</button>
+    </div>
+}
+
+<div class="todo-grid" @ref="listElement">
+    @foreach (var todo in todos)
+    {
+        <div class="card">@todo.Title</div>
+    }
+</div>
+
+@code
+{
+    private bool showForm = false;
+    private List<TodoItem>? todos = new();
+    private TodoItem newTodo = new();
+    private ElementReference listElement;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TodoItem todoToday = new TodoItem() { Title = "Estudar" };
+        TodoItem todoYesterday = new TodoItem() { Title = "Treinar" };
+        TodoItem todoTomorrow = new TodoItem() { Title = "Jogar Monster Hunter Rise" };
+        @* LoadTodos(); *@
+        todos.Add(todoToday);
+        todos.Add(todoYesterday);
+        todos.Add(todoTomorrow);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initSortable", listElement);
+        }
+    }
+
+    void ToggleForm()
+    {
+        showForm = !showForm;
+    } 
+
+    async Task AddTodo()
+    {
+        @* await Http.PostAsJsonAsync("https://vigilant-acorn-g966g7g695j3v7jg-5207.app.github.dev/todos", newTodo); *@
+
+        todos.Add(newTodo);
+
+        newTodo = new();
+        showForm = false;
+        @* LoadTodos(); *@
+    }
+
+    async Task LoadTodos()
+    {
+        todos = await Http.GetFromJsonAsync<List<TodoItem>>("https://vigilant-acorn-g966g7g695j3v7jg-5207.app.github.dev/todos");
+    }
+}

@@ -6,6 +6,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("Todo"));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazor", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -15,6 +26,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowBlazor");
 
 app.MapGet("/todos", async (AppDbContext db) =>
 {
@@ -28,7 +41,7 @@ app.MapGet("/todos/{id}", async (int id, AppDbContext db) =>
             : Results.NotFound()
 );
 
-app.MapPost("todos", async (TodoItem todo, AppDbContext db) =>
+app.MapPost("/todos", async (TodoItem todo, AppDbContext db) =>
 {
     db.Todos.Add(todo);
     await db.SaveChangesAsync();
