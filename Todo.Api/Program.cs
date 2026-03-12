@@ -56,6 +56,7 @@ app.MapPut("/todos/{id}", async (int id, TodoItem inputTodo, AppDbContext db) =>
     if (todo is null) return Results.NotFound();
 
     todo.Title = inputTodo.Title;
+    todo.Description = inputTodo.Description;
     todo.Completed = inputTodo.Completed;
 
     await db.SaveChangesAsync();
