@@ -23,9 +23,8 @@
             <button class="btn btn-primary mt-2">
                 Adicionar
             </button>
-
+            <button class="btn btn-danger mt-2" @onclick="ToggleForm">Cancelar</button>
         </EditForm>
-        <button @onclick="ToggleForm">Cancelar</button>
     </div>
 }
 
@@ -48,7 +47,7 @@
         TodoItem todoToday = new TodoItem() { Title = "Estudar" };
         TodoItem todoYesterday = new TodoItem() { Title = "Treinar" };
         TodoItem todoTomorrow = new TodoItem() { Title = "Jogar Monster Hunter Rise" };
-        @* LoadTodos(); *@
+        await LoadTodos();
         todos.Add(todoToday);
         todos.Add(todoYesterday);
         todos.Add(todoTomorrow);
@@ -69,17 +68,18 @@
 
     async Task AddTodo()
     {
-        @* await Http.PostAsJsonAsync("https://vigilant-acorn-g966g7g695j3v7jg-5207.app.github.dev/todos", newTodo); *@
+        await Http.PostAsJsonAsync("/todos", newTodo);
 
         todos.Add(newTodo);
 
         newTodo = new();
         showForm = false;
-        @* LoadTodos(); *@
+        await LoadTodos();
     }
 
     async Task LoadTodos()
     {
-        todos = await Http.GetFromJsonAsync<List<TodoItem>>("https://vigilant-acorn-g966g7g695j3v7jg-5207.app.github.dev/todos");
+        todos = await Http.GetFromJsonAsync<List<TodoItem>>("/todos");
+        Console.WriteLine(todos);
     }
 }

@@ -7,7 +7,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("https://vigilant-acorn-g966g7g695j3v7jg-5207.app.github.dev")
+    BaseAddress = new Uri("http://localhost:5207")
 });
 
 await builder.Build().RunAsync();
